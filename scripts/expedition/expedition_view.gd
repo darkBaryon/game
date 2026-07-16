@@ -93,6 +93,7 @@ func _draw() -> void:
 
 func _build_world() -> void:
 	player = Player.new()
+	player.apply_survivor_support(GameState.quarters_repaired)
 	player.position = Vector2(640, 390)
 	player.died.connect(_on_player_died)
 	player.health_changed.connect(_on_health_changed)
@@ -116,8 +117,8 @@ func _build_hud() -> void:
 	row.add_child(UIFactory.label("废土回收区 K-17", 18, Color("dce9ff")))
 	health_bar = ProgressBar.new()
 	health_bar.custom_minimum_size = Vector2(250, 25)
-	health_bar.max_value = 100
-	health_bar.value = 100
+	health_bar.max_value = player.max_health
+	health_bar.value = player.health
 	health_bar.show_percentage = false
 	health_bar.add_theme_stylebox_override("background", UIFactory.panel_style(Color("24192a"), Color("4d3559"), 1, 6))
 	health_bar.add_theme_stylebox_override("fill", UIFactory.panel_style(Color("bd4b62"), Color("ff7b8f"), 0, 6))
@@ -145,7 +146,10 @@ func _build_hud() -> void:
 	objective_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	objective_box.add_child(objective_label)
 
-	message_label = UIFactory.label("WASD / 方向键移动 · 武器自动锁定", 15, Color("a4b5ce"))
+	var control_hint := "WASD / 方向键移动 · 武器自动锁定"
+	if player.survivor_support_active:
+		control_hint = "林岚的火控链路已同步 · 攻击与回收效率提升"
+	message_label = UIFactory.label(control_hint, 15, Color("a4b5ce"))
 	message_label.position = Vector2(400, 92)
 	message_label.size = Vector2(480, 40)
 	message_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

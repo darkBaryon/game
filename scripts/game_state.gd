@@ -8,6 +8,7 @@ var scrap: int = 12
 var energy: int = 3
 var reactor_repaired: bool = false
 var habitat_repaired: bool = false
+var quarters_repaired: bool = false
 var mission_count: int = 0
 var intro_seen: bool = false
 var persistence_enabled: bool = true
@@ -36,6 +37,15 @@ func repair_habitat() -> bool:
 	return true
 
 
+func repair_quarters() -> bool:
+	if quarters_repaired or not habitat_repaired or scrap < 30:
+		return false
+	scrap -= 30
+	quarters_repaired = true
+	_commit()
+	return true
+
+
 func complete_mission(recovered_scrap: int) -> void:
 	scrap += maxi(recovered_scrap, 0)
 	energy = maxi(energy - 2, 0)
@@ -55,6 +65,7 @@ func reset_progress() -> void:
 	energy = 3
 	reactor_repaired = false
 	habitat_repaired = false
+	quarters_repaired = false
 	mission_count = 0
 	intro_seen = false
 	_commit()
@@ -70,6 +81,7 @@ func save_game() -> void:
 		"energy": energy,
 		"reactor_repaired": reactor_repaired,
 		"habitat_repaired": habitat_repaired,
+		"quarters_repaired": quarters_repaired,
 		"mission_count": mission_count,
 		"intro_seen": intro_seen,
 	}
@@ -90,6 +102,7 @@ func load_game() -> void:
 	energy = int(data.get("energy", energy))
 	reactor_repaired = bool(data.get("reactor_repaired", reactor_repaired))
 	habitat_repaired = bool(data.get("habitat_repaired", habitat_repaired))
+	quarters_repaired = bool(data.get("quarters_repaired", quarters_repaired))
 	mission_count = int(data.get("mission_count", mission_count))
 	intro_seen = bool(data.get("intro_seen", intro_seen))
 

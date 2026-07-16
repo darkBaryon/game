@@ -12,6 +12,8 @@ var move_speed: float = 265.0
 var attack_damage: float = 16.0
 var attack_interval: float = 0.48
 var attack_range: float = 430.0
+var pickup_radius: float = 145.0
+var survivor_support_active: bool = false
 
 var _attack_cooldown: float = 0.12
 var _hurt_flash: float = 0.0
@@ -52,6 +54,16 @@ func take_damage(amount: float) -> void:
 func heal(amount: float) -> void:
 	health = minf(health + amount, max_health)
 	health_changed.emit(health, max_health)
+
+
+func apply_survivor_support(enabled: bool) -> void:
+	if not enabled or survivor_support_active:
+		return
+	survivor_support_active = true
+	max_health += 25.0
+	health = max_health
+	attack_damage *= 1.2
+	pickup_radius += 50.0
 
 
 func apply_upgrade(upgrade_id: StringName) -> String:

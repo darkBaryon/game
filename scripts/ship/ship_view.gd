@@ -9,6 +9,7 @@ var mission_report: String = ""
 var resource_label: Label
 var reactor_button: Button
 var habitat_button: Button
+var quarters_button: Button
 var launch_button: Button
 var status_label: Label
 var visual: Control
@@ -59,7 +60,7 @@ func _build_interface() -> void:
 	resource_label = UIFactory.label("", 18, Color("a9c7ff"))
 	resource_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	resource_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	resource_label.custom_minimum_size = Vector2(300, 0)
+	resource_label.custom_minimum_size = Vector2(410, 0)
 	header.add_child(resource_label)
 
 	var content := HBoxContainer.new()
@@ -99,6 +100,10 @@ func _build_interface() -> void:
 	habitat_button.pressed.connect(_repair_habitat)
 	sidebar_layout.add_child(habitat_button)
 
+	quarters_button = UIFactory.button("恢复居民舱 · 30 废料", Color("6da8ff"))
+	quarters_button.pressed.connect(_repair_quarters)
+	sidebar_layout.add_child(quarters_button)
+
 	launch_button = UIFactory.button("登陆废土 · 消耗 2 能源", Color("4f8cff"))
 	launch_button.pressed.connect(func() -> void: launch_requested.emit())
 	sidebar_layout.add_child(launch_button)
@@ -108,14 +113,15 @@ func _build_interface() -> void:
 	reset_button.pressed.connect(func() -> void: reset_requested.emit())
 	sidebar_layout.add_child(reset_button)
 
-	var footer := UIFactory.label("原型目标：修复反应堆 → 登陆废土 → 回收资源 → 点亮生态舱", 14, Color("6f829f"))
+	var footer := UIFactory.label("生存链：重启反应堆 → 恢复生态舱 → 唤醒第一名幸存者", 14, Color("6f829f"))
 	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	layout.add_child(footer)
 
 
 func _refresh() -> void:
-	resource_label.text = "能源  %02d    废料  %02d    航次  %02d" % [GameState.energy, GameState.scrap, GameState.mission_count]
-	visual.set_ship_state(GameState.reactor_repaired, GameState.habitat_repaired)
+	var survivors := 1 if GameState.quarters_repaired else 0
+	resource_label.text = "能源 %02d   废料 %02d   航次 %02d   幸存者 %02d" % [GameState.energy, GameState.scrap, GameState.mission_count, survivors]
+	visual.set_ship_state(GameState.reactor_repaired, GameState.habitat_repaired, GameState.quarters_repaired)
 
 	reactor_button.disabled = GameState.reactor_repaired or GameState.scrap < 8
 	reactor_button.text = "反应堆已上线" if GameState.reactor_repaired else "重启聚变反应堆 · 8 废料"
@@ -123,11 +129,16 @@ func _refresh() -> void:
 	habitat_button.disabled = GameState.habitat_repaired or not GameState.reactor_repaired or GameState.scrap < 18
 	habitat_button.text = "生态舱已恢复" if GameState.habitat_repaired else "修复生态舱 · 18 废料"
 
+	quarters_button.disabled = GameState.quarters_repaired or not GameState.habitat_repaired or GameState.scrap < 30
+	quarters_button.text = "幸存者林岚已苏醒" if GameState.quarters_repaired else "恢复居民舱 · 30 废料"
+
 	launch_button.disabled = not GameState.reactor_repaired or GameState.energy < 2
-	if GameState.habitat_repaired:
-		status_label.text = "舰长，第一层生态循环已经恢复。黑暗中出现了微弱但稳定的生命信号。\n\n原型循环完成。"
-	elif not mission_report.is_empty():
-		status_label.text = mission_report + "\n\n我们可以把这些材料投入生态舱。"
+	if not mission_report.is_empty():
+		status_label.text = mission_report + "\n\n" + _next_objective_text()
+	elif GameState.quarters_repaired:
+		status_label.text = "林岚 / 能源科学家 / 火系异能。\n\n她选择留守方舟，为您接入火控链路。永久增益：生命 +25、攻击 +20%、回收范围 +50。"
+	elif GameState.habitat_repaired:
+		status_label.text = "第一层生态循环已经恢复。\n\n深空天线同时捕捉到一段不属于方舟的人造信号。居民舱正在等待 30 单位材料。"
 	elif GameState.reactor_repaired:
 		status_label.text = "反应堆输出稳定在 12%。登陆艇已经获得最低启动能源。\n\n废土信标中检测到可回收合金。"
 	else:
@@ -146,3 +157,18 @@ func _repair_habitat() -> void:
 		AudioDirector.play_repair()
 		mission_report = "A-01：检测到第一株幼苗的生命反应。"
 		_refresh()
+
+
+func _repair_quarters() -> void:
+	if GameState.repair_quarters():
+		AudioDirector.play_repair()
+		mission_report = "A-01：居民舱生命支持恢复。林岚的休眠舱已经打开。"
+		_refresh()
+
+
+func _next_objective_text() -> String:
+	if GameState.quarters_repaired:
+		return "林岚选择留守方舟，下次行动将获得她的火控支援。"
+	if GameState.habitat_repaired:
+		return "未知文明信号已记录。继续回收 30 单位废料，恢复居民舱。"
+	return "我们可以把这些材料投入生态舱。"

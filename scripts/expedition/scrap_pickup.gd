@@ -18,8 +18,9 @@ func _physics_process(delta: float) -> void:
 	if not is_instance_valid(target):
 		return
 	var distance := global_position.distance_to(target.global_position)
-	if distance < 145.0:
-		var pull_speed := lerpf(90.0, 520.0, 1.0 - distance / 145.0)
+	var pickup_radius := target.pickup_radius
+	if distance < pickup_radius:
+		var pull_speed := lerpf(90.0, 520.0, 1.0 - distance / pickup_radius)
 		global_position += global_position.direction_to(target.global_position) * pull_speed * delta
 	if distance < 23.0:
 		AudioDirector.play_pickup()

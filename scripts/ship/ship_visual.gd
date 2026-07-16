@@ -2,11 +2,13 @@ extends Control
 
 var reactor_active: bool = false
 var habitat_active: bool = false
+var quarters_active: bool = false
 
 
-func set_ship_state(reactor: bool, habitat: bool) -> void:
+func set_ship_state(reactor: bool, habitat: bool, quarters: bool) -> void:
 	reactor_active = reactor
 	habitat_active = habitat
+	quarters_active = quarters
 	queue_redraw()
 
 
@@ -31,7 +33,7 @@ func _draw() -> void:
 
 	_draw_room(center + Vector2(-150, -55), Vector2(175, 110), "REACTOR", reactor_active, Color("ff9f43"))
 	_draw_room(center + Vector2(65, -55), Vector2(175, 110), "ECO LAB", habitat_active, Color("55d68b"))
-	_draw_room(center + Vector2(-40, 70), Vector2(190, 62), "CRYO DECK", false, Color("6da8ff"))
+	_draw_room(center + Vector2(-40, 70), Vector2(190, 62), "CIVIL DECK", quarters_active, Color("6da8ff"))
 
 	# A-01 maintenance robot.
 	var robot_pos := center + Vector2(-35, 18)

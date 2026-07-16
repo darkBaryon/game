@@ -11,6 +11,7 @@ func _ready() -> void:
 
 	_expect(GameState.scrap == 12, "new game starts with 12 scrap")
 	_expect(GameState.energy == 3, "new game starts with 3 energy")
+	_expect(not GameState.repair_quarters(), "quarters are gated by earlier repairs")
 
 	var main := MainScene.instantiate()
 	add_child(main)
@@ -53,6 +54,20 @@ func _ready() -> void:
 	_expect(GameState.scrap == 24, "recovered scrap returns to the ship")
 	_expect(GameState.energy == 13, "expedition consumes ship energy")
 	_expect(GameState.mission_count == 1, "mission count advances")
+	_expect(GameState.repair_habitat(), "habitat can be repaired after recovery")
+	_expect(GameState.habitat_repaired, "habitat repair is persistent state")
+	var current_status := main.current_view.get("status_label") as Label
+	_expect(current_status != null and current_status.text.contains("信号"), "habitat recovery reveals the unknown signal")
+	GameState.complete_mission(40)
+	_expect(GameState.repair_quarters(), "quarters can be repaired after habitat")
+	_expect(GameState.quarters_repaired, "quarters repair wakes the first survivor")
+	main._start_expedition()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	expedition = main.current_view
+	_expect(expedition.player.max_health == 125.0, "survivor support increases expedition health")
+	_expect(expedition.player.attack_damage > 16.0, "survivor support increases expedition damage")
+	_expect(expedition.player.pickup_radius > 145.0, "survivor support increases pickup range")
 	main.free()
 	AudioDirector.stop_all()
 	await get_tree().process_frame

@@ -22,6 +22,7 @@ func _physics_process(delta: float) -> void:
 		var pull_speed := lerpf(90.0, 520.0, 1.0 - distance / 145.0)
 		global_position += global_position.direction_to(target.global_position) * pull_speed * delta
 	if distance < 23.0:
+		AudioDirector.play_pickup()
 		collected.emit(amount)
 		queue_free()
 	queue_redraw()

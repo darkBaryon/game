@@ -57,6 +57,7 @@ func take_damage(amount: float) -> void:
 	health = maxf(health - amount, 0.0)
 	_hit_flash = 0.1
 	if health <= 0.0:
+		AudioDirector.play_defeat(is_boss)
 		defeated.emit(global_position, reward, is_boss)
 		queue_free()
 

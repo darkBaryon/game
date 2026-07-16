@@ -136,11 +136,13 @@ func _refresh() -> void:
 
 func _repair_reactor() -> void:
 	if GameState.repair_reactor():
+		AudioDirector.play_repair()
 		mission_report = "A-01：核心温度上升。方舟-01 正在重新呼吸。"
 		_refresh()
 
 
 func _repair_habitat() -> void:
 	if GameState.repair_habitat():
+		AudioDirector.play_repair()
 		mission_report = "A-01：检测到第一株幼苗的生命反应。"
 		_refresh()

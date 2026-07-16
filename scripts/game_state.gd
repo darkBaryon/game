@@ -9,6 +9,7 @@ var energy: int = 3
 var reactor_repaired: bool = false
 var habitat_repaired: bool = false
 var mission_count: int = 0
+var intro_seen: bool = false
 var persistence_enabled: bool = true
 
 
@@ -42,12 +43,20 @@ func complete_mission(recovered_scrap: int) -> void:
 	_commit()
 
 
+func mark_intro_seen() -> void:
+	if intro_seen:
+		return
+	intro_seen = true
+	_commit()
+
+
 func reset_progress() -> void:
 	scrap = 12
 	energy = 3
 	reactor_repaired = false
 	habitat_repaired = false
 	mission_count = 0
+	intro_seen = false
 	_commit()
 
 
@@ -62,6 +71,7 @@ func save_game() -> void:
 		"reactor_repaired": reactor_repaired,
 		"habitat_repaired": habitat_repaired,
 		"mission_count": mission_count,
+		"intro_seen": intro_seen,
 	}
 	file.store_string(JSON.stringify(data, "\t"))
 
@@ -81,6 +91,7 @@ func load_game() -> void:
 	reactor_repaired = bool(data.get("reactor_repaired", reactor_repaired))
 	habitat_repaired = bool(data.get("habitat_repaired", habitat_repaired))
 	mission_count = int(data.get("mission_count", mission_count))
+	intro_seen = bool(data.get("intro_seen", intro_seen))
 
 
 func _commit() -> void:

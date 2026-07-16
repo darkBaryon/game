@@ -2,6 +2,7 @@ extends Node
 
 const ShipView := preload("res://scripts/ship/ship_view.gd")
 const ExpeditionView := preload("res://scripts/expedition/expedition_view.gd")
+const OpeningView := preload("res://scripts/opening/opening_view.gd")
 
 var current_view: Node
 
@@ -9,7 +10,18 @@ var current_view: Node
 func _ready() -> void:
 	_configure_input()
 	_configure_font()
-	show_ship()
+	if GameState.intro_seen:
+		show_ship()
+	else:
+		show_opening()
+
+
+func show_opening() -> void:
+	_replace_current_view()
+	var opening := OpeningView.new()
+	opening.completed.connect(_finish_opening)
+	add_child(opening)
+	current_view = opening
 
 
 func show_ship(report: String = "") -> void:
@@ -30,6 +42,12 @@ func _start_expedition() -> void:
 	expedition.mission_finished.connect(_finish_expedition)
 	add_child(expedition)
 	current_view = expedition
+	AudioDirector.play_launch()
+
+
+func _finish_opening() -> void:
+	GameState.mark_intro_seen()
+	show_ship("A-01：舰长权限恢复。方舟-01 等待您的指令。")
 
 
 func _finish_expedition(recovered_scrap: int, success: bool, reason: String) -> void:

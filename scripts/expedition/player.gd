@@ -16,6 +16,7 @@ var attack_range: float = 430.0
 var _attack_cooldown: float = 0.12
 var _hurt_flash: float = 0.0
 var _invulnerability: float = 0.0
+var upgrade_count: int = 0
 
 
 func _ready() -> void:
@@ -53,6 +54,23 @@ func heal(amount: float) -> void:
 	health_changed.emit(health, max_health)
 
 
+func apply_upgrade(upgrade_id: StringName) -> String:
+	upgrade_count += 1
+	match upgrade_id:
+		&"overcharge":
+			attack_damage *= 1.4
+			return "等离子过载：武器伤害提升 40%"
+		&"rapid_fire":
+			attack_interval = maxf(attack_interval * 0.76, 0.16)
+			return "脉冲供能：自动攻击间隔缩短 24%"
+		&"nanoshield":
+			max_health += 35.0
+			health = minf(health + 55.0, max_health)
+			health_changed.emit(health, max_health)
+			return "纳米护盾：生命上限 +35 并恢复生命"
+	return "未知强化"
+
+
 func _auto_attack() -> void:
 	var closest: Node2D
 	var closest_distance := attack_range
@@ -73,6 +91,7 @@ func _auto_attack() -> void:
 	bullet.direction = global_position.direction_to(closest.global_position)
 	bullet.damage = attack_damage
 	get_parent().add_child(bullet)
+	AudioDirector.play_shot()
 
 
 func _draw() -> void:

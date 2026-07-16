@@ -8,6 +8,27 @@ const Pickup := preload("res://scripts/expedition/scrap_pickup.gd")
 
 const MISSION_DURATION := 55.0
 const BOSS_TIME := 32.0
+const UPGRADE_THRESHOLDS: Array[int] = [4, 10]
+const UPGRADES: Array[Dictionary] = [
+	{
+		"id": &"overcharge",
+		"title": "等离子过载",
+		"description": "自动武器伤害 +40%",
+		"accent": Color("ff7b7b"),
+	},
+	{
+		"id": &"rapid_fire",
+		"title": "脉冲供能",
+		"description": "攻击间隔缩短 24%",
+		"accent": Color("ffbd55"),
+	},
+	{
+		"id": &"nanoshield",
+		"title": "纳米护盾",
+		"description": "生命上限 +35，并恢复生命",
+		"accent": Color("65d99a"),
+	},
+]
 
 var player: ExpeditionPlayer
 var elapsed: float = 0.0
@@ -17,6 +38,7 @@ var kills: int = 0
 var boss_spawned: bool = false
 var boss_defeated: bool = false
 var mission_ended: bool = false
+var next_upgrade_index: int = 0
 
 var health_bar: ProgressBar
 var scrap_label: Label
@@ -24,6 +46,8 @@ var time_label: Label
 var objective_label: Label
 var extract_button: Button
 var message_label: Label
+var upgrade_layer: CanvasLayer
+var upgrade_overlay: Control
 
 
 func _ready() -> void:
@@ -133,6 +157,54 @@ func _build_hud() -> void:
 	extract_button.visible = false
 	extract_button.pressed.connect(func() -> void: _finish(true, "守卫已清除。"))
 	layer.add_child(extract_button)
+	_build_upgrade_overlay()
+
+
+func _build_upgrade_overlay() -> void:
+	upgrade_layer = CanvasLayer.new()
+	upgrade_layer.layer = 40
+	upgrade_layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(upgrade_layer)
+
+	upgrade_overlay = ColorRect.new()
+	upgrade_overlay.color = Color(0.01, 0.02, 0.05, 0.9)
+	upgrade_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	upgrade_overlay.process_mode = Node.PROCESS_MODE_ALWAYS
+	upgrade_layer.add_child(upgrade_overlay)
+
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	upgrade_overlay.add_child(center)
+
+	var layout := VBoxContainer.new()
+	layout.custom_minimum_size = Vector2(1000, 0)
+	layout.add_theme_constant_override("separation", 22)
+	center.add_child(layout)
+	var eyebrow := UIFactory.label("A-01 / 异能共振协议", 15, Color("6e9ed9"))
+	eyebrow.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	layout.add_child(eyebrow)
+	var title := UIFactory.label("选择一项远征强化", 30, Color("edf5ff"))
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	layout.add_child(title)
+
+	var cards := HBoxContainer.new()
+	cards.add_theme_constant_override("separation", 18)
+	layout.add_child(cards)
+	for upgrade: Dictionary in UPGRADES:
+		var accent: Color = upgrade["accent"]
+		var card := UIFactory.button(
+			"%s\n\n%s\n\n选择" % [upgrade["title"], upgrade["description"]],
+			accent
+		)
+		card.custom_minimum_size = Vector2(320, 190)
+		card.add_theme_font_size_override("font_size", 19)
+		card.pressed.connect(_select_upgrade.bind(upgrade["id"]))
+		cards.add_child(card)
+
+	var hint := UIFactory.label("强化仅在本次远征中生效", 14, Color("7789a5"))
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	layout.add_child(hint)
+	upgrade_overlay.visible = false
 
 
 func _spawn_enemy(as_boss: bool) -> void:
@@ -167,6 +239,9 @@ func _on_enemy_defeated(at_position: Vector2, reward: int, was_boss: bool) -> vo
 	pickup.amount = reward
 	pickup.collected.connect(_on_scrap_collected)
 	add_child(pickup)
+	if next_upgrade_index < UPGRADE_THRESHOLDS.size() and kills >= UPGRADE_THRESHOLDS[next_upgrade_index]:
+		next_upgrade_index += 1
+		call_deferred("_offer_upgrade")
 	if was_boss:
 		boss_defeated = true
 		objective_label.text = "守卫已清除，返回方舟"
@@ -199,6 +274,22 @@ func _finish(success: bool, reason: String) -> void:
 	if mission_ended:
 		return
 	mission_ended = true
+	get_tree().paused = false
 	if not success:
 		recovered_scrap = int(floor(recovered_scrap * 0.5))
 	mission_finished.emit(recovered_scrap, success, reason)
+
+
+func _offer_upgrade() -> void:
+	if mission_ended or upgrade_overlay.visible:
+		return
+	upgrade_overlay.visible = true
+	get_tree().paused = true
+
+
+func _select_upgrade(upgrade_id: StringName) -> void:
+	var result := player.apply_upgrade(upgrade_id)
+	message_label.text = result
+	upgrade_overlay.visible = false
+	get_tree().paused = false
+	AudioDirector.play_upgrade()

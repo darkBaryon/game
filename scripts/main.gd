@@ -9,7 +9,6 @@ var current_view: Node
 
 func _ready() -> void:
 	_configure_input()
-	_configure_font()
 	if GameState.intro_seen:
 		show_ship()
 	else:
@@ -68,15 +67,6 @@ func _replace_current_view() -> void:
 		remove_child(current_view)
 		current_view.queue_free()
 	current_view = null
-
-
-func _configure_font() -> void:
-	var system_font := SystemFont.new()
-	system_font.font_names = PackedStringArray(["PingFang SC", "Hiragino Sans GB", "Helvetica Neue", "Arial"])
-	var theme := Theme.new()
-	theme.default_font = system_font
-	theme.default_font_size = 18
-	get_tree().root.theme = theme
 
 
 func _configure_input() -> void:

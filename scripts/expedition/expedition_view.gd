@@ -183,7 +183,7 @@ func _build_upgrade_overlay() -> void:
 	var eyebrow := UIFactory.label("A-01 / 异能共振协议", 15, Color("6e9ed9"))
 	eyebrow.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	layout.add_child(eyebrow)
-	var title := UIFactory.label("选择一项远征强化", 30, Color("edf5ff"))
+	var title := UIFactory.label("选择一项行动强化", 30, Color("edf5ff"))
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	layout.add_child(title)
 
@@ -201,7 +201,7 @@ func _build_upgrade_overlay() -> void:
 		card.pressed.connect(_select_upgrade.bind(upgrade["id"]))
 		cards.add_child(card)
 
-	var hint := UIFactory.label("强化仅在本次远征中生效", 14, Color("7789a5"))
+	var hint := UIFactory.label("强化仅在本次行动中生效", 14, Color("7789a5"))
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	layout.add_child(hint)
 	upgrade_overlay.visible = false

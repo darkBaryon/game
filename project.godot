@@ -14,6 +14,7 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 
 GameState="*res://scripts/game_state.gd"
 AudioDirector="*res://scripts/audio/audio_director.gd"
+AppTheme="*res://scripts/ui/app_theme.gd"
 
 [display]
 

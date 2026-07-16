@@ -114,7 +114,7 @@ func _build_interface() -> void:
 
 
 func _refresh() -> void:
-	resource_label.text = "能源  %02d    废料  %02d    远征  %02d" % [GameState.energy, GameState.scrap, GameState.mission_count]
+	resource_label.text = "能源  %02d    废料  %02d    航次  %02d" % [GameState.energy, GameState.scrap, GameState.mission_count]
 	visual.set_ship_state(GameState.reactor_repaired, GameState.habitat_repaired)
 
 	reactor_button.disabled = GameState.reactor_repaired or GameState.scrap < 8

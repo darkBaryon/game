@@ -10,7 +10,7 @@
 4. 回收材料并返回星舰。
 5. 使用材料修复生态舱，点亮方舟第一层。
 
-当前包含可跳过的“机器人唤醒舰长”序章、三种远征强化和无需外部音频素材的程序化音效。
+当前包含可跳过的“机器人唤醒舰长”序章、三种行动强化和无需外部音频素材的程序化音效。
 
 ## 本机运行
 
@@ -35,3 +35,7 @@ godot --headless --path . --scene res://tests/smoke_test.tscn
 - 游戏数值优先使用 Godot Resource，存档写入 `user://`。
 - `.godot/`、导出产物和构建缓存不进入 Git。
 - 二进制美术和音频素材后续使用 Git LFS 管理。
+
+## 第三方资源
+
+- Noto Sans SC（GB2312 字符子集），SIL Open Font License 1.1，许可证见 `assets/fonts/OFL-1.1.txt`。

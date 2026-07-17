@@ -17,6 +17,14 @@
 
 项目使用 Godot 4.7.1 Standard 和 GDScript。
 
+在 macOS 终端直接运行：
+
+```bash
+./run.sh
+```
+
+`run.sh` 会自动查找 Godot；如果安装在其他位置，可以使用 `GODOT_BIN=/path/to/Godot ./run.sh`。
+
 1. 使用 Godot 打开仓库根目录中的 `project.godot`。
 2. 点击编辑器右上角运行按钮，或按 `F6/F5`。
 3. 序章使用空格、回车或界面按钮推进。

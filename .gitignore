@@ -2,4 +2,6 @@
 build/
 exports/
 *.tmp
+__pycache__/
+*.pyc
 .DS_Store

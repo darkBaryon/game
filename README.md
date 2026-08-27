@@ -25,6 +25,30 @@
 
 `run.sh` 会自动查找 Godot；如果安装在其他位置，可以使用 `GODOT_BIN=/path/to/Godot ./run.sh`。
 
+## Codex 接第三方模型
+
+如果你要让 Codex 通过 JD Cloud 的 Anthropic 接口工作，可以先起本地桥接服务：
+
+```bash
+export JD_MODEL_API_KEY='你的 JD Cloud key'
+export JD_MODEL_ID='T-C-4-jy'
+./tools/run_jdcloud_responses_bridge.sh --port 8000
+```
+
+然后在 `~/.codex/config.toml` 里配置：
+
+```toml
+model = "T-C-4-jy"
+model_provider = "jdcloud-bridge"
+
+[model_providers.jdcloud-bridge]
+name = "JDCloud Anthropic bridge"
+base_url = "http://127.0.0.1:8000/v1"
+wire_api = "responses"
+```
+
+这个桥把 Codex 的 Responses 请求翻译成你现有的 `anthropic/v1/messages` 接口，所以不用改上游服务。
+
 1. 使用 Godot 打开仓库根目录中的 `project.godot`。
 2. 点击编辑器右上角运行按钮，或按 `F6/F5`。
 3. 序章使用空格、回车或界面按钮推进。
